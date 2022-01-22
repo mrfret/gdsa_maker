@@ -1,4 +1,10 @@
 # service_account_maker
+
+Install:
+```
+sudo git clone https://github.com/mrfret/gdsa_maker && cd gdsa_maker && sudo pip3 install -r requirements.txt
+```
+
 Usage: sa_maker.py [OPTIONS] COMMAND [ARGS]...
 
   service_account_maker
