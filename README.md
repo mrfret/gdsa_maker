@@ -1,11 +1,33 @@
 # service_account_maker
-
-All credit to l3uddz...
+Utility to easily make google service accounts
 
 Install:
 ```
 sudo git clone https://github.com/mrfret/gdsa_maker && cd gdsa_maker && sudo pip3 install -r requirements.txt
 ```
+
+Authorize:
+```
+python3 sa_maker.py authorize
+```
+
+Edit config:
+```
+sudo nano config.json
+```
+```
+{
+  "client_id": "CLIENT_ID_HERE",
+  "client_secret": "CLIENT_SECRET_HERE",,
+  "project_id": "PROJECT_ID_HERE"
+  "service_account_folder": "/root/gdsa_maker/service_accounts"
+}
+```
+  Basic command:
+  
+  ```
+  python3 sa_maker.py create-service-accounts -n <prefix_of_sa> -a <number_of_sa_to_create>
+  ```
 
 Usage: sa_maker.py [OPTIONS] COMMAND [ARGS]...
 
@@ -43,9 +65,3 @@ Args:
   --key-prefix, -k    Name prefix of service accounts
   ```
   
-  Basic command:
-  
-  ```
-  python3 sa_maker.py create-service-accounts -n <prefix_of_sa> -a <number_of_sa_to_create>
-  ```
-
