@@ -46,6 +46,6 @@ Args:
   Basic command:
   
   ```
-  python3 sa_maker.py create-accounts -n <prefix_of_sa> -a <number_of_sa_to_create>
+  python3 sa_maker.py create-service-accounts -n <prefix_of_sa> -a <number_of_sa_to_create>
   ```
 
