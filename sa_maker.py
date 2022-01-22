@@ -2,6 +2,7 @@
 import json
 import os
 import sys
+import shutil
 from copy import copy
 
 import click
@@ -79,7 +80,7 @@ def app(verbose, config_path, log_path, token_path):
     logger.configure(**config_logger)
 
     # Load google
-    google = Google(cfg.client_id, cfg.client_secret, cfg.project_name, token_path)
+    google = Google(cfg.client_id, cfg.client_secret, cfg.project_id, token_path)
 
     # Display params
     logger.info("%s = %r" % ("LOG_PATH".ljust(12), log_path))
@@ -93,18 +94,25 @@ def app(verbose, config_path, log_path, token_path):
 ############################################################
 
 @app.command(help='Authorize Google Account')
-def authorize():
+@click.option('--auth-code', '-c', default=None, required=False, help='Authorization Code', )
+@click.option('--link-only', '-l', required=False, is_flag=True, help='Authorization Link only to stdout')
+def authorize(auth_code=None, link_only=False):
     global google, cfg
+
+    if link_only:
+        print(google.get_auth_link())
+        sys.exit(0)
 
     logger.debug(f"client_id: {cfg.client_id!r}")
     logger.debug(f"client_secret: {cfg.client_secret!r}")
 
     # Provide authorization link
-    logger.info("Visit the link below and paste the authorization code")
-    logger.info(google.get_auth_link())
-    logger.info("Enter authorization code: ")
-    auth_code = input()
-    logger.debug(f"auth_code: {auth_code!r}")
+    if not auth_code:
+        logger.info("Visit the link below and paste the authorization code")
+        logger.info(google.get_auth_link())
+        logger.info("Enter authorization code: ")
+        auth_code = input()
+        logger.debug(f"auth_code: {auth_code!r}")
 
     # Exchange authorization code
     token = google.exchange_code(auth_code)
@@ -116,7 +124,22 @@ def authorize():
     sys.exit(0)
 
 
-@app.command(help='Retrieve existing groups')
+@app.command(help='List user accounts')
+def list_user_accounts():
+    global google, cfg
+
+    # retrieve admin accounts
+    logger.info("Retrieving user accounts...")
+    success, accounts = google.get_user_accounts()
+    if success:
+        logger.info(f"User accounts:\n{json.dumps(accounts, indent=2)}")
+        sys.exit(0)
+    else:
+        logger.error(f"Failed to user accounts:\n{accounts}")
+        sys.exit(1)
+
+
+@app.command(help='List existing groups')
 def list_groups():
     global google, cfg
 
@@ -236,7 +259,7 @@ def set_group_users(name, key_prefix):
     sys.exit(0)
 
 
-@app.command(help='Lists users for a group')
+@app.command(help='List users for a group')
 @click.option('--name', '-n', required=True, help='Name of the group')
 def list_group_users(name):
     global google, cfg
@@ -262,8 +285,8 @@ def list_group_users(name):
         sys.exit(1)
 
 
-@app.command(help='Retrieve existing service accounts')
-def list_accounts():
+@app.command(help='List existing service accounts')
+def list_service_accounts():
     global google, cfg
 
     # retrieve service accounts
@@ -280,8 +303,11 @@ def list_accounts():
 @app.command(help='Create service accounts')
 @click.option('--name', '-n', required=True, help='Name prefix for service accounts')
 @click.option('--amount', '-a', default=1, required=False, help='Amount of service accounts to create')
-def create_accounts(name, amount=1):
+def create_service_accounts(name, amount=1):
     global google, cfg
+
+    # convert name to lowercase
+    name = name.lower()
 
     service_key_folder = os.path.join(cfg.service_account_folder, name)
 
@@ -298,7 +324,7 @@ def create_accounts(name, amount=1):
         sys.exit(1)
 
     for account_number in range(starting_account_number, starting_account_number + amount):
-        account_name = f'{name}{account_number:06d}'
+        account_name = f'{name}-{account_number:03d}'
 
         # create the service account
         success, service_account = google.create_service_account(account_name)
@@ -310,7 +336,7 @@ def create_accounts(name, amount=1):
             # create key for new service account
             success, service_key = google.create_service_account_key(account_email)
             if success and (isinstance(service_key, dict) and 'privateKeyData' in service_key):
-                service_key_path = os.path.join(service_key_folder, f'{account_number}.json')
+                service_key_path = os.path.join(service_key_folder, f'{name}_{account_number:03d}.json')
                 if misc.dump_service_file(service_key_path, service_key):
                     logger.info(f"Created service key for account {account_email!r}: {service_key_path}")
                 else:
@@ -324,7 +350,52 @@ def create_accounts(name, amount=1):
             sys.exit(1)
 
 
-@app.command(help='Retrieve existing teamdrives')
+@app.command(help='Remove service accounts')
+@click.option('--name', '-n', required=True, help='Name prefix for service accounts')
+def remove_service_accounts(name):
+    global google, cfg
+
+    service_key_folder = os.path.join(cfg.service_account_folder, name)
+
+    # remove service accounts files
+    if os.path.exists(service_key_folder):
+        logger.debug(f"Removing service key folder: {service_key_folder!r}")
+        try:
+            shutil.rmtree(service_key_folder)
+            logger.info(f"Removed server key folder: {service_key_folder!r}")
+        except OSError as e:
+            print("Error: %s - %s." % (e.filename, e.strerror))
+
+    # retrieve service accounts
+    emails = []
+    logger.debug("Retrieving existing service accounts...")
+    success, service_accounts = google.get_service_accounts()
+    if success:
+        logger.debug("Retrieved existing service accounts.")
+        for account in service_accounts['accounts']:
+            if account['email'].startswith(name):
+                emails.append(account['email'])
+        if len(emails) == 0:
+            logger.info(f"No service account emails matched.")
+            sys.exit(0)
+    else:
+        logger.error(f"Failed to retrieve service accounts:\n{service_accounts}")
+        sys.exit(1)
+
+    # remove service accounts
+    for email in emails:
+        logger.debug(f"Removing service account: {email}")
+        success, resp = google.delete_service_account(email)
+        if not success:
+            logger.error(f"Failed removing service account: {email}")
+            logger.error(f"Unexpected response when removing service account: {email!r}:\n{resp}")
+            sys.exit(1)
+        else:
+            logger.info(f"Removed service account: {email}")
+    sys.exit(0)
+
+
+@app.command(help='List existing teamdrives')
 def list_teamdrives():
     global google, cfg
 
@@ -393,8 +464,35 @@ def set_teamdrive_users(name, key_prefix):
             sys.exit(1)
     sys.exit(0)
 
+@app.command(help='Set group for a teamdrive')
+@click.option('--name', '-n', required=True, help='Name of the existing teamdrive')
+@click.option('--group', '-g', required=True, help='Name of the group')
+@click.option('--domain', '-d', required=True, help='Domain of the G Suite account')
+def set_teamdrive_group(name, group, domain):
+    global google, cfg
 
-@app.command(help='Lists users for a teamdrive')
+    # retrieve teamdrive id
+    success, teamdrives = google.get_teamdrives()
+    if not success:
+        logger.error(f"Unable to retrieve existing teamdrives:\n{teamdrives}")
+        sys.exit(1)
+
+    teamdrive_id = misc.get_teamdrive_id(teamdrives, name)
+    if not teamdrive_id:
+        logger.error(f"Failed to determine teamdrive_id of teamdrive with name {name!r}")
+        sys.exit(1)
+
+    # share access to teamdrive
+    group_email = name + '@' + domain
+    success, resp = google.set_teamdrive_share_user(teamdrive_id, group_email)
+    if success:
+        logger.info(f"Shared access to {name!r} teamdrive for group: {group}")
+    else:
+        logger.error(f"Failed sharing access to {name!r} teamdrive for group {group!r}:\n{resp}")
+        sys.exit(1)
+    sys.exit(0)
+
+@app.command(help='List users for a teamdrive')
 @click.option('--name', '-n', required=True, help='Name of the teamdrive')
 def list_teamdrive_users(name):
     global google, cfg

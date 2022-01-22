@@ -15,10 +15,10 @@ class Google:
     scopes = ['https://www.googleapis.com/auth/cloud-platform', 'https://www.googleapis.com/auth/drive',
               'https://www.googleapis.com/auth/admin.directory.group']
 
-    def __init__(self, client_id, client_secret, project_name, token_path):
+    def __init__(self, client_id, client_secret, project_id, token_path):
         self.client_id = client_id
         self.client_secret = client_secret
-        self.project_name = project_name
+        self.project_id = project_id
         self.token_path = token_path
         self.token = self._load_token()
         self.token_refresh_lock = Lock()
@@ -96,6 +96,14 @@ class Google:
     # GOOGLE METHODS
     ############################################################
 
+    def get_user_accounts(self):
+        success, resp, resp_data = self.query(f'https://www.googleapis.com/admin/directory/v1/users', params={
+            'customer': 'my_customer',
+            'maxResults': 200,
+            'viewType': 'admin_view',
+        }, fetch_all_pages=True)
+        return True if resp.status_code == 200 else False, resp_data
+
     def get_groups(self):
         success, resp, resp_data = self.query(f'https://www.googleapis.com/admin/directory/v1/groups', params={
             'customer': 'my_customer',
@@ -131,28 +139,35 @@ class Google:
         return True if resp.status_code == 200 else False, resp_data
 
     def get_service_accounts(self):
-        success, resp, resp_data = self.query(f'projects/{self.project_name}/serviceAccounts', fetch_all_pages=True,
+        success, resp, resp_data = self.query(f'projects/{self.project_id}/serviceAccounts', fetch_all_pages=True,
                                               page_type='accounts', params={'pageSize': 100})
         return success, resp_data
 
     def get_service_account_keys(self, service_account):
-        success, resp, resp_data = self.query(f'projects/{self.project_name}/serviceAccounts/{service_account}/keys',
+        success, resp, resp_data = self.query(f'projects/{self.project_id}/serviceAccounts/{service_account}/keys',
                                               fetch_all_pages=True, page_type='keys', params={'pageSie': 100})
         return success, resp_data
 
     def create_service_account(self, name):
-        success, resp, resp_data = self.query(f'projects/{self.project_name}/serviceAccounts', 'POST', json={
-            'accountId': f'{name}'
+        success, resp, resp_data = self.query(f'projects/{self.project_id}/serviceAccounts', 'POST', json={
+            'accountId': f'{name}',
+            "serviceAccount": {
+                "displayName": f'{name}'
+            }
         })
         return success, resp_data
 
     def create_service_account_key(self, name):
-        success, resp, resp_data = self.query(f'projects/{self.project_name}/serviceAccounts/{name}/keys', 'POST',
+        success, resp, resp_data = self.query(f'projects/{self.project_id}/serviceAccounts/{name}/keys', 'POST',
                                               json={
                                                   'privateKeyType': 'TYPE_GOOGLE_CREDENTIALS_FILE',
                                                   'keyAlgorithm': 'KEY_ALG_RSA_2048'
                                               })
         return success, resp_data
+
+    def delete_service_account(self, email):
+        success, resp, resp_data = self.query(f'projects/{self.project_id}/serviceAccounts/{email}', 'DELETE')
+        return True if resp.status_code == 200 else False, resp_data
 
     def get_teamdrives(self):
         success, resp, resp_data = self.query('https://www.googleapis.com/drive/v3/teamdrives',
