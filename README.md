@@ -1,16 +1,16 @@
-#Utility to easily make google service accounts
+# Utility to easily make google service accounts
 
-#Install:
+# Install:
 ```
 sudo git clone https://github.com/mrfret/gdsa_maker && cd gdsa_maker && sudo pip3 install -r requirements.txt
 ```
 
-#Authorize:
+# Authorize:
 ```
 python3 sa_maker.py authorize
 ```
 
-#Edit config:
+# Edit config:
 ```
 sudo nano config.json
 ```
@@ -22,7 +22,7 @@ sudo nano config.json
   "service_account_folder": "/root/gdsa_maker/service_accounts"
 }
 ```
-#Basic command:
+# Basic command:
   
 ```
 python3 sa_maker.py create-service-accounts -n <prefix_of_sa> -a <number_of_sa_to_create>
