@@ -9,6 +9,7 @@ sudo git clone https://github.com/mrfret/gdsa_maker && cd gdsa_maker && sudo pip
 ```
 python3 sa_maker.py authorize
 ```
+This will create the default config.
 
 # Edit config:
 ```
@@ -22,6 +23,8 @@ sudo nano config.json
   "service_account_folder": "/root/gdsa_maker/service_accounts"
 }
 ```
+Then run authorize again
+
 # Basic command:
   
 ```
