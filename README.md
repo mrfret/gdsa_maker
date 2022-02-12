@@ -36,6 +36,7 @@ Then run authorize again
 ```
 python3 sa_maker.py create-service-accounts -n <prefix_of_sa> -a <number_of_sa_to_create>
 ```
+# If you get an error message about API not being enabled, simply follow the link provided in the error and enable the required API
 
 Usage: sa_maker.py [OPTIONS] COMMAND [ARGS]...
 
