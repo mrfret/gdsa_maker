@@ -1,15 +1,11 @@
 # Utility to easily make google service accounts
 
 # Install:
-Install python3 if you haven't already:
+Install python3 and git if you haven't already:
 ```
-sudo apt-get update
-sudo apt-get install python3.8 python3-pip
+sudo apt update -yqq && sudo apt install python3.8 python3-pip -yqq && sudo apt install git -yqq
 ```
-Install git:
-```
-sudo apt install git
-```
+
 Then for gdsa-maker:
 ```
 sudo git clone https://github.com/mrfret/gdsa_maker && cd gdsa_maker && sudo pip3 install -r requirements.txt
