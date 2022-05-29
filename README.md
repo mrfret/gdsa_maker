@@ -53,24 +53,21 @@ Options:
   --help              Show this message and exit.
 
 Commands:
-  authorize               Authorize Google Account
-  create-accounts         Create service accounts
-  create-group            Create group
-  create-teamdrive        Create teamdrive
-  list-accounts           Retrieve existing service accounts
-  list-group-users        Lists users for a group
-  list-groups             Retrieve existing groups
-  list-teamdrive-users    Lists users for a teamdrive
-  list-teamdrives         Retrieve existing teamdrives
-  remove-group            Remove a group
-  remove-teamdrive-users  Remove users from a teamdrive
-  set-group-users         Set users for a group
-  set-teamdrive-users     Set users for a teamdrive
-  
-Args:
-  --name, -n          Name prefix
-  --amount, -a        Amount of service accounts to create
-  --domain, -d        Domain of the G Suite account
-  --key-prefix, -k    Name prefix of service accounts
+  authorize                Authorize Google Account
+  create-group             Create group
+  create-service-accounts  Create service accounts
+  create-teamdrive         Create teamdrive
+  list-group-users         List users for a group
+  list-groups              List existing groups
+  list-service-accounts    List existing service accounts
+  list-teamdrive-users     List users for a teamdrive
+  list-teamdrives          List existing teamdrives
+  list-user-accounts       List user accounts
+  remove-group             Remove a group
+  remove-service-accounts  Remove service accounts
+  remove-teamdrive-users   Remove users from a teamdrive
+  set-group-users          Set users for a group
+  set-teamdrive-group      Set group for a teamdrive
+  set-teamdrive-users      Set users for a teamdrive
   ```
   
