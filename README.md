@@ -69,5 +69,11 @@ Commands:
   set-group-users          Set users for a group
   set-teamdrive-group      Set group for a teamdrive
   set-teamdrive-users      Set users for a teamdrive
+  
+  Args:
+  --name, -n          Name prefix
+  --amount, -a        Amount of service accounts to create
+  --domain, -d        Domain of the G Suite account
+  --key-prefix, -k    Name prefix of service accounts
   ```
   
