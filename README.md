@@ -29,6 +29,15 @@ sudo nano config.json
   "service_account_folder": "/root/gdsa_maker/service_accounts"
 }
 ```
+Make sure you use the project ID and not just the name. Most of the time they are the same,
+but sometimes can be different like:
+
+projectx-364758
+
+Check here:
+
+https://console.cloud.google.com/cloud-resource-manager?walkthrough_id=resource-manager--create-project&_ga=2.113127300.1022120207.1667047847-124764366.1653830517
+
 Then run authorize again
 
 # Basic command:
