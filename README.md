@@ -1,3 +1,5 @@
+##CURRENTLY NOT WORKING
+
 ## All credit for this goes to l3uddz. I only edited documentation for easier understanding.
 
 # Utility to easily make google service accounts
