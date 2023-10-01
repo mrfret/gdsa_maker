@@ -5,7 +5,7 @@
 # Install:
 Install python3 and git if you haven't already:
 ```
-sudo apt update -yqq && sudo apt install python3.8 python3-pip -yqq && sudo apt install git -yqq
+sudo apt update -yqq && sudo apt install python3.10 python3-pip -yqq && sudo apt install git -yqq
 ```
 
 Then for gdsa-maker:
